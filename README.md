@@ -19,7 +19,7 @@ pip install -r requirements.txt
 **4. Starta appen:**
 
 ```bash
-streamlit run app.py
+streamlit run dashboard.py
 ```
 
 Sidan öppnas i webbläsaren. Den uppdateras automatiskt varje gång du sparar `app.py`.
@@ -27,6 +27,8 @@ Sidan öppnas i webbläsaren. Den uppdateras automatiskt varje gång du sparar `
 ---
 
 ## Lägg in din egen data
+
+Tänk på att .csv som finns i data mappen tillhör exempeldatabasen, du måste exportera dina egna .csv filer:
 
 **1. Kör din SQL-fråga** i MySQL Workbench.
 
