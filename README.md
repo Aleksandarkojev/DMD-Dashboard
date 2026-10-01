@@ -1,12 +1,13 @@
-# HR secondment analysis
+# HR Analytics Dashboard
 
-A data modeling course project: ER modeling, SQL analysis, and an interactive
-dashboard built on a MySQL `hr` database tracking employee secondments
-(temporary assignments between offices), timesheets, mentors, and feedback.
+This project demonstrates a complete HR analytics workflow using MySQL, SQL, Python, Pandas, and Streamlit. The solution includes database design, data cleaning, business-focused SQL analysis, automated data exports, and an interactive dashboard for exploring employee secondments, mentor workload, timesheets, and feedback trends.
+
+## Dashboard Preview
+
+![Dashboard Preview](Images/dashboard_overview.png)
 
 ## Project structure
 
-```
 hr-secondment-analysis/
 ├── sql/
 │   ├── hr1_komplett_databearbetning.sql   # full data cleaning, run on a fresh copy of the original
