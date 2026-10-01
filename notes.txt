@@ -1,0 +1,24 @@
+Dashboard Version 1
+
+Data sources:
+- analys HR 3 medelbetyg.csv
+- analys HR 3 leveranskvalitet.csv
+- analys HR 4.csv
+
+KPIs:
+- Totalt antal uppdrag
+- Tidrapporter per uppdrag
+- Avdelning med bäst feedback
+- Avdelning med flest uppdrag
+
+Charts:
+- Medelbetyg per kanal
+- Ranking av kanaler efter feedback
+- Uppdrag per avdelning
+- Tidrapporter per avdelning
+- Medelbetyg per avdelning
+- Feedback per avdelning
+- Trend över tid
+
+Status:
+Version 1 completed 2026-09-26

@@ -1,104 +1,78 @@
-# Dashboard – template
+# HR secondment analysis
 
-En enkel Streamlit-dashboard som visar data från MySQL, via CSV-filer.
+A data modeling course project: ER modeling, SQL analysis, and an interactive
+dashboard built on a MySQL `hr` database tracking employee secondments
+(temporary assignments between offices), timesheets, mentors, and feedback.
 
----
+## Project structure
 
-## Kom igång
+```
+hr-secondment-analysis/
+├── sql/
+│   ├── hr1_komplett_databearbetning.sql   # full data cleaning, run on a fresh copy of the original
+│   └── hr_business_analysis.sql   # 16 business-focused SQL queries
+├── scripts/
+│   └── export_data.py             # exports flat CSVs from MySQL for the dashboard
+├── data/                          # CSVs consumed by app.py (generated, not hand-edited)
+├── app.py                         # Streamlit dashboard
+├── requirements.txt
+└── .env.example                   # copy to .env with your MySQL credentials
+```
 
-**1. Forka det här repot** till ditt eget GitHub-konto (knappen **Fork** uppe till höger).
+## Data model
 
-**2. Klona ditt fork till datorn.** I VS Code: `Ctrl+Shift+P` → *Git: Clone* → klistra in adressen till **ditt** fork.
+The database has 11 tables centered on **secondments** — temporary employee
+assignments to another office. Key relationships:
 
-**3. Installera det som behövs.** Öppna terminalen i VS Code och kör:
+- `employees` — the people
+- `departments` — org units, linked to secondments
+- `secondments` — an assignment: which path, which department, dates/status
+- `secondment_paths` — from-office/to-office routes with distance
+- `offices` — office locations
+- `mentors` / `secondment_mentors` — many-to-many, mentors assigned to secondments
+- `timesheets` — hours/rate logged per employee per secondment
+- `rate_adjustments` — corrections tied to a timesheet
+- `feedback` — rating and resolution status tied to a timesheet
+- `profiler` — extended 1:1 profile data per employee
+
+**Known modeling note:** `employees` has no direct foreign key to
+`secondments` — the only path is `employees → timesheets → secondments`.
+There's also no "hours worked" column, so cost figures in this analysis are a
+rate-volume proxy (sum/avg of `hourly_rate` per timesheet row), not true
+labor cost.
+
+## Setup
 
 ```bash
 pip install -r requirements.txt
+cp .env.example .env   # fill in your MySQL credentials
+python scripts/export_data.py   # regenerate CSVs from the live database
+streamlit run app.py
 ```
 
-**4. Starta appen:**
+The `data/` folder already contains CSVs generated from the sample dataset,
+so `streamlit run app.py` works out of the box without a live database
+connection — re-run `export_data.py` only if the source data changes.
 
-```bash
-streamlit run dashboard.py
-```
+## SQL analysis
 
-Sidan öppnas i webbläsaren. Den uppdateras automatiskt varje gång du sparar `app.py`.
+`sql/hr_business_analysis.sql` covers four areas: cost/rate, workload,
+mentor load, and feedback trends. Some notable findings:
 
----
+- Rate volume is close between Systemutveckling and Dataanalys departments,
+  with Infrastruktur lower.
+- Senior-level timesheets average roughly double the hourly rate of Konsult level.
+- Mentor load is fairly even: each of the 12 mentors is assigned to 33-55 secondments (Lina Falk 55, Iris Sand 53).
+- Feedback rating doesn't differ much between resolved and unresolved cases
+  (3.62 vs 3.68 avg), which is worth digging into further.
 
-## Lägg in din egen data
+## Dashboard
 
-Tänk på att .csv som finns i data mappen tillhör exempeldatabasen, du måste exportera dina egna .csv filer:
+`app.py` is a single-page Streamlit dashboard with department and date
+filters, showing:
 
-**1. Kör din SQL-fråga** i MySQL Workbench.
-
-**2. Exportera resultatet som CSV.** Klicka på exportikonen ovanför resultatgriden och spara filen i mappen `data/`.
-
-**3. Lägg till en analys i `app.py`.** Kopiera mallen längst ner i filen och byt ut filnamn och kolumnnamn:
-
-```python
-st.header("Din rubrik")
-st.write("En mening om vad analysen visar.")
-
-df = las("din_fil.csv")
-
-st.dataframe(df, hide_index=True)
-st.bar_chart(df, x="kolumn_med_kategorier", y="kolumn_med_siffror")
-```
-
-**4. Spara.** Sidan uppdateras direkt.
-
----
-
-## De kommandon du behöver
-
-| Kommando | Gör |
-|---|---|
-| `st.title("...")` | Stor rubrik |
-| `st.header("...")` | Underrubrik |
-| `st.write("...")` | Vanlig text |
-| `st.dataframe(df)` | Visar en tabell |
-| `st.bar_chart(df, x=..., y=...)` | Stapeldiagram |
-| `st.line_chart(df, x=..., y=...)` | Linjediagram — bra för utveckling över tid |
-| `st.metric("Rubrik", värde)` | En stor siffra |
-| `st.divider()` | En linje mellan avsnitten |
-| `st.columns(2)` | Delar upp sidan i kolumner |
-
----
-
-## Välj rätt diagram
-
-Du kan hitta inspiration om fler datavisualiseringar här https://streamlit.io/gallery
-
-| Frågan du svarar på | Diagram |
-|---|---|
-| Hur fördelar sig något på kategorier? | `st.bar_chart` |
-| Hur utvecklas något över tid? | `st.line_chart` |
-| En enskild viktig siffra | `st.metric` |
-| Detaljer som ska gå att läsa av | `st.dataframe` |
-
----
-
-## Om något går fel
-
-**`ModuleNotFoundError: No module named 'streamlit'`**
-Du har inte installerat paketen. Kör `pip install -r requirements.txt`.
-
-**`Hittar inte filen: data/...`**
-Filnamnet stämmer inte, eller så ligger CSV-filen någon annanstans än i `data/`.
-
-**Diagrammet är tomt**
-Kolumnnamnen i `x=` och `y=` måste stämma exakt med rubrikerna i CSV-filen. Kolla med `st.dataframe(df)` först — då ser du vad kolumnerna heter.
-
-**Åäö ser konstiga ut**
-Exportera CSV:n som UTF-8 från Workbench.
-
----
-
-## Spara ditt arbete
-
-```bash
-git add .
-git commit -m "La till min analys"
-git push
-```
+1. KPI row (employees, secondments, timesheets, avg rate)
+2. Rate sum by department / avg rate by role level
+3. Secondment status breakdown / avg feedback rating by channel
+4. Feedback rating trend over time
+5. Top 10 employees by timesheet count
